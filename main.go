@@ -10,8 +10,10 @@ import (
 func main() {
 	config.New().ConfigPath(filepath.Join(BaseDir(), "config")).Load("cnf")
 	// effective immediately
-	// config.New().ConfigPath(filepath.Join(BaseDir(), "config")).Load("cnf").Watching()
+	//config.New().ConfigPath(filepath.Join(BaseDir(), "config")).Load("cnf").Watching()
 	fmt.Println(config.GetString("Users.default.Shawn"))
+
+	//
 }
 
 func BaseDir() string {
