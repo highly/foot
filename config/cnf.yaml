@@ -1,0 +1,5 @@
+ServiceName: foot
+Debug: false
+Users:
+  default:
+    Shawn: shawn0828@hotmail.com
