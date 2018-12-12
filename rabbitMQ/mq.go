@@ -42,6 +42,7 @@ func New(exchangeGroupName string) (*RabbitMQ, error) {
 	}
 	mq.channel, err = mq.conn.Channel()
 	if err != nil {
+		mq.conn.Close()
 		return nil, fmt.Errorf("mq channel init failed, [%s]", err)
 	}
 	return mq.exchange(exchangeGroupName)
@@ -59,10 +60,10 @@ func (mq *RabbitMQ) Publish(content string) (err error, shutdown func() error) {
 			DeliveryMode: amqp.Persistent,
 		},
 	); err != nil {
-		return fmt.Errorf("mq exchange publish: %s", err), mq.publishClose
+		return fmt.Errorf("mq exchange publish: %s", err), mq.mqClose
 	}
 
-	return nil, mq.publishClose
+	return nil, mq.mqClose
 }
 
 func (mq *RabbitMQ) Consume(callBack func(content amqp.Delivery) bool) (err error, shutdown func() error) {
@@ -70,13 +71,13 @@ func (mq *RabbitMQ) Consume(callBack func(content amqp.Delivery) bool) (err erro
 		mq.info.queueName, mq.info.consumerTag, false, false, false, false, nil,
 	)
 	if err != nil {
-		return fmt.Errorf("mq queue consume failed, [%s]", err), mq.mqClose
+		return fmt.Errorf("mq queue consume failed, [%s]", err), mq.consumerClose
 	}
 
 	mq.info.handler = callBack
 	go mq.handleConsume(deliveries, mq.done)
 
-	return nil, mq.mqClose
+	return nil, mq.consumerClose
 }
 
 func (mq *RabbitMQ) amqpURI() string {
@@ -102,16 +103,23 @@ func (mq *RabbitMQ) dialConfig() amqp.Config {
 }
 
 func (mq *RabbitMQ) exchange(exchangeGroupName string) (*RabbitMQ, error) {
-	if err := mq.exchangeCnf(exchangeGroupName); err != nil {
+	var err error
+	defer func() {
+		if err != nil {
+			mq.mqClose()
+		}
+	}()
+
+	if err = mq.exchangeCnf(exchangeGroupName); err != nil {
 		return nil, err
 	}
-	if err := mq.exchangeDeclare(); err != nil {
+	if err = mq.exchangeDeclare(); err != nil {
 		return nil, err
 	}
-	if err := mq.queueDeclare(); err != nil {
+	if err = mq.queueDeclare(); err != nil {
 		return nil, err
 	}
-	if err := mq.queueBind(); err != nil {
+	if err = mq.queueBind(); err != nil {
 		return nil, err
 	}
 	return mq, nil
@@ -180,7 +188,7 @@ func (mq *RabbitMQ) getContentType(body string) string {
 	return ContentTypePlain
 }
 
-func (mq *RabbitMQ) mqClose() error {
+func (mq *RabbitMQ) consumerClose() error {
 	if err := mq.channel.Cancel(mq.info.consumerTag, true); err != nil {
 		return fmt.Errorf("mq RabbitMQ cancel failed, [%s]", err)
 	}
@@ -193,7 +201,7 @@ func (mq *RabbitMQ) mqClose() error {
 	return <-mq.done
 }
 
-func (mq *RabbitMQ) publishClose() error {
+func (mq *RabbitMQ) mqClose() error {
 	go func() {
 		mq.done <- nil
 	}()
