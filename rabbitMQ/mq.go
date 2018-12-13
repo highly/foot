@@ -60,10 +60,10 @@ func (mq *RabbitMQ) Publish(content string) (err error, shutdown func() error) {
 			DeliveryMode: amqp.Persistent,
 		},
 	); err != nil {
-		return fmt.Errorf("mq exchange publish: %s", err), mq.mqClose
+		return fmt.Errorf("mq exchange publish: %s", err), mq.connectionClose
 	}
 
-	return nil, mq.mqClose
+	return nil, mq.connectionClose
 }
 
 func (mq *RabbitMQ) Consume(callBack func(content amqp.Delivery) bool) (err error, shutdown func() error) {
@@ -106,10 +106,9 @@ func (mq *RabbitMQ) exchange(exchangeGroupName string) (*RabbitMQ, error) {
 	var err error
 	defer func() {
 		if err != nil {
-			mq.mqClose()
+			mq.connectionClose()
 		}
 	}()
-
 	if err = mq.exchangeCnf(exchangeGroupName); err != nil {
 		return nil, err
 	}
@@ -189,23 +188,25 @@ func (mq *RabbitMQ) getContentType(body string) string {
 }
 
 func (mq *RabbitMQ) consumerClose() error {
+	return mq.mqClose(true)
+}
+
+func (mq *RabbitMQ) connectionClose() error {
+	return mq.mqClose(false)
+}
+
+func (mq *RabbitMQ) mqClose(consumer bool) error {
 	if err := mq.channel.Cancel(mq.info.consumerTag, true); err != nil {
 		return fmt.Errorf("mq RabbitMQ cancel failed, [%s]", err)
 	}
-
 	if err := mq.conn.Close(); err != nil {
 		return fmt.Errorf("AMQP connection close error, [%s]", err)
 	}
-
 	defer log.Println("AMQP shutdown OK")
-	return <-mq.done
-}
-
-func (mq *RabbitMQ) mqClose() error {
-	go func() {
-		mq.done <- nil
-	}()
-	return mq.mqClose()
+	if consumer {
+		return <-mq.done
+	}
+	return nil
 }
 
 func (mq *RabbitMQ) handleConsume(deliveries <-chan amqp.Delivery, done chan error) {

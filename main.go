@@ -21,7 +21,7 @@ func main() {
 
 func usingMQ() {
 	mq1 := initMq("groupname1")
-	handler := func(content amqp.Delivery) bool {
+	if err, _ := mq1.Consume(func(content amqp.Delivery) bool {
 		fmt.Println(
 			"groupname1 => ",
 			"content: ", string(content.Body),
@@ -29,13 +29,12 @@ func usingMQ() {
 			"deliveryTag: ", content.DeliveryTag,
 		)
 		return true
-	}
-	if err, _ := mq1.Consume(handler); err != nil {
+	}); err != nil {
 		panic("mq1 consume failed")
 	}
 
 	mq2 := initMq("groupname2")
-	handler2 := func(content amqp.Delivery) bool {
+	err, mq2Showdown := mq2.Consume(func(content amqp.Delivery) bool {
 		fmt.Println(
 			"groupname2 => ",
 			"content: ", string(content.Body),
@@ -43,8 +42,7 @@ func usingMQ() {
 			"deliveryTag: ", content.DeliveryTag,
 		)
 		return true
-	}
-	err, mq2Showdown := mq2.Consume(handler2)
+	})
 	if err != nil {
 		panic("mq2 consume failed")
 	}
@@ -59,8 +57,8 @@ func usingMQ() {
 	}
 	_, mq1Shutdown := mq1.Publish("closing")
 
-	mq1Shutdown()
 	mq2Showdown()
+	mq1Shutdown()
 }
 
 func initMq(exchangeGroupName string) *rabbitMQ.RabbitMQ {
