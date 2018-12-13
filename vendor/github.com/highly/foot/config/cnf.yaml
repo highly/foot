@@ -1,0 +1,23 @@
+ServiceName: foot
+Debug: false
+
+RabbitMQ:
+  Connection:
+    Default:
+        Host: 10.10.10.10
+        Port: 5672
+        User: root
+        Password: 123456
+        Vhost: /
+
+  Exchange:
+    GroupName1:
+      ExchangeName: shawn_to_mq
+      QueueName: queue_name_1
+      RoutingKey: routing_key_1
+      ConsumerTag:
+    GroupName2:
+      ExchangeName: mq_to_shawn
+      QueueName: queue_name_2
+      RoutingKey: routing_key_2
+      ConsumerTag: consumer_mq
