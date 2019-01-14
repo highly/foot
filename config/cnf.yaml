@@ -1,5 +1,15 @@
 ServiceName: foot
 Debug: false
+LogLevel: 3
+
+Mysql:
+  default:
+    Host: rm-abc.mysql.rds.aliyuncs.com
+    Port: 3306
+    Username: root
+    Password: 123456
+    Database: demo_foot
+    Charset: utf8
 
 RabbitMQ:
   Connection:

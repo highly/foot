@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/highly/foot/config"
+	"github.com/highly/foot/log"
+	"github.com/highly/foot/orm"
 	"github.com/highly/foot/rabbitMQ"
 	"github.com/highly/foot/utils"
 	"github.com/streadway/amqp"
@@ -10,13 +12,34 @@ import (
 	"time"
 )
 
+type Mistake struct {
+	orm.Model
+	StuId      uint64 `json:"stu_id"`
+	QuestionId uint64 `json:"question_id"`
+}
+
+func (t *Mistake) TableName() string {
+	return "mistake"
+}
+
 func main() {
 	usingConfig()
 
-	usingMQ()
+	//usingMQ()
+
+	usingOrm()
 
 	fmt.Println("blocking...")
 	select {}
+}
+
+func usingOrm() {
+	log.New(config.GetInt("logLevel"))
+	db, _ := orm.NewGorm()
+
+	var personList Mistake
+	db.First(&personList)
+	fmt.Println(personList)
 }
 
 func usingMQ() {
