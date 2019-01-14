@@ -82,10 +82,10 @@ func (mq *RabbitMQ) Consume(callBack func(content amqp.Delivery) bool) (err erro
 
 func (mq *RabbitMQ) amqpURI() string {
 	amqpURI := fmt.Sprintf("amqp://%s:%s@%s:%d/",
-		config.Get("rabbitmq.connection.default.user"),
-		config.Get("rabbitmq.connection.default.password"),
-		config.Get("rabbitmq.connection.default.host"),
-		config.GetInt("rabbitmq.connection.default.port"),
+		config.String("rabbitmq.connection.default.user"),
+		config.String("rabbitmq.connection.default.password"),
+		config.String("rabbitmq.connection.default.host"),
+		config.Int("rabbitmq.connection.default.port"),
 	)
 	log.Println("mq host url: ", amqpURI)
 	return amqpURI
@@ -93,7 +93,7 @@ func (mq *RabbitMQ) amqpURI() string {
 
 func (mq *RabbitMQ) dialConfig() amqp.Config {
 	vhost := "/"
-	configVhost := config.GetString("rabbitmq.connection.default.vhost")
+	configVhost := config.String("rabbitmq.connection.default.vhost")
 	if configVhost != "" {
 		vhost = configVhost
 	}
@@ -125,7 +125,7 @@ func (mq *RabbitMQ) exchange(exchangeGroupName string) (*RabbitMQ, error) {
 }
 
 func (mq *RabbitMQ) exchangeCnf(exchangeGroupName string) error {
-	exchangeConfig := config.GetStringMapString(fmt.Sprintf("rabbitmq.exchange.%s", exchangeGroupName))
+	exchangeConfig := config.StringMapString(fmt.Sprintf("rabbitmq.exchange.%s", exchangeGroupName))
 	if exchangeConfig == nil {
 		return fmt.Errorf("mq exhange group [%s] not found", exchangeGroupName)
 	}

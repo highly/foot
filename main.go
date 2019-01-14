@@ -8,6 +8,7 @@ import (
 	"github.com/highly/foot/rabbitMQ"
 	"github.com/highly/foot/utils"
 	"github.com/streadway/amqp"
+	"os"
 	"path/filepath"
 	"time"
 )
@@ -23,23 +24,25 @@ func (t *Mistake) TableName() string {
 }
 
 func main() {
-	usingConfig()
+	initConfig()
 
-	//usingMQ()
+	initLog()
 
-	usingOrm()
+	// usingMQ()
+
+	// usingOrm()
 
 	fmt.Println("blocking...")
 	select {}
 }
 
 func usingOrm() {
-	log.New(config.GetInt("logLevel"))
-	db, _ := orm.NewGorm()
-
-	var personList Mistake
-	db.First(&personList)
-	fmt.Println(personList)
+	//log.New(config.Int("logLevel"))
+	//db, _ := orm.NewGorm()
+	//
+	//var personList Mistake
+	//db.First(&personList)
+	//fmt.Println(personList)
 }
 
 func usingMQ() {
@@ -92,9 +95,39 @@ func initMq(exchangeGroupName string) *rabbitMQ.RabbitMQ {
 	return mq
 }
 
-func usingConfig() {
-	config.New().EnvPrefix("TEST").ConfigPath(filepath.Join(utils.BaseDir(), "config")).Load("cnf")
-	// effective immediately
-	//config.New().ConfigPath(filepath.Join(BaseDir(), "config")).Load("cnf").Watching()
-	fmt.Println(config.GetStringMapString("rabbitmq.exchange.default")["exchangename"])
+func initLog() {
+	hostname, _ := os.Hostname()
+
+	opts := []log.Option{
+		log.WithField("hostname", hostname),
+		log.WithField("hostip", utils.Ip()),
+		log.WithField("environment", config.String("environment")),
+		log.WithField("service_name", config.String("serviceName")),
+		log.WithField("version", config.String("version")),
+		log.WithLevel(log.ToLevel(config.DefaultString("log.level", "info"))),
+		log.WithPath(config.DefaultString("log.path", "test.log")),
+		log.WithMaxSize(config.DefaultInt("log.maxSize", 50)),
+		log.WithMaxBackups(config.DefaultInt("log.maxBackups", 5)),
+		log.WithMaxAge(config.DefaultInt("log.age", 5)),
+	}
+
+	log.New(opts...)
+
+	log.Info("log test")
+}
+
+func initConfig() {
+	// 1)
+	// config.EnvPrefix("TEST")
+	// config.ConfigPath(filepath.Join(utils.BaseDir(), "config"))
+	// config.Load("cnf")
+
+	// 2)
+	config.EnvPrefix("TEST")
+	config.LoadFile(filepath.Join(utils.BaseDir(), "cnf.yaml"))
+
+	// plus) effective immediately
+	// config.Watching()
+
+	fmt.Println("testing config: ", config.StringMap("rabbitmq.exchange.GroupName1")["exchangename"])
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,6 +17,32 @@ func BaseDir() string {
 		panic(err)
 	}
 	return dir
+}
+
+func Ip() string {
+	var ip string
+	addrs, _ := net.InterfaceAddrs()
+	for _, addr := range addrs {
+		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() && ipnet.IP.To4() != nil {
+			ip = ipnet.IP.String()
+			break
+		}
+	}
+	return ip
+}
+
+func IsDir(path string) bool {
+	if f, err := os.Stat(path); err == nil {
+		return f.Mode().IsDir()
+	}
+	return false
+}
+
+func IsFile(path string) bool {
+	if f, err := os.Stat(path); err == nil {
+		return f.Mode().IsRegular()
+	}
+	return false
 }
 
 func Md5Hash(in string) string {

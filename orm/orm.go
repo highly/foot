@@ -32,15 +32,15 @@ func NewGormWithName(scope string) (*gorm.DB, error) {
 		}
 		db.LogMode(true)
 		db.SetLogger(gormLogger{})
-		if maxIdleConns := config.GetInt(fmt.Sprintf("Mysql.%s.MaxIdleConns", scope)); maxIdleConns > 0 {
+		if maxIdleConns := config.Int(fmt.Sprintf("Mysql.%s.MaxIdleConns", scope)); maxIdleConns > 0 {
 			log.Debugf("set msyql MaxIdleConns: %d", maxIdleConns)
 			db.DB().SetMaxIdleConns(maxIdleConns)
 		}
-		if maxOpenConns := config.GetInt(fmt.Sprintf("Mysql.%s.MaxOpenConns", scope)); maxOpenConns > 0 {
+		if maxOpenConns := config.Int(fmt.Sprintf("Mysql.%s.MaxOpenConns", scope)); maxOpenConns > 0 {
 			log.Debugf("set mysql MaxOpenConns: %d", maxOpenConns)
 			db.DB().SetMaxOpenConns(maxOpenConns)
 		}
-		if connMaxLifetime := config.GetDuration(fmt.Sprintf("Mysql.%s.ConnMaxLifetime", scope)); connMaxLifetime > 0 {
+		if connMaxLifetime := config.Duration(fmt.Sprintf("Mysql.%s.ConnMaxLifetime", scope)); connMaxLifetime > 0 {
 			log.Debugf("set mysql ConnMaxLifetime: %d", connMaxLifetime)
 			db.DB().SetConnMaxLifetime(connMaxLifetime)
 		}
@@ -142,12 +142,12 @@ func (gormLogger) Print(v ...interface{}) {
 }
 
 func dsn(scope string) string {
-	username := config.GetString(fmt.Sprintf("Mysql.%s.Username", scope))
-	password := config.GetString(fmt.Sprintf("Mysql.%s.Password", scope))
-	host := config.GetString(fmt.Sprintf("Mysql.%s.Host", scope))
-	port := config.GetInt(fmt.Sprintf("Mysql.%s.Port", scope))
-	database := config.GetString(fmt.Sprintf("Mysql.%s.Database", scope))
-	charset := config.GetString(fmt.Sprintf("Mysql.%s.Charset", scope))
+	username := config.String(fmt.Sprintf("Mysql.%s.Username", scope))
+	password := config.String(fmt.Sprintf("Mysql.%s.Password", scope))
+	host := config.String(fmt.Sprintf("Mysql.%s.Host", scope))
+	port := config.Int(fmt.Sprintf("Mysql.%s.Port", scope))
+	database := config.String(fmt.Sprintf("Mysql.%s.Database", scope))
+	charset := config.String(fmt.Sprintf("Mysql.%s.Charset", scope))
 	format := "%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=True&loc=Local"
 	return fmt.Sprintf(format, username, password, host, port, database, charset)
 }

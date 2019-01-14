@@ -1,7 +1,7 @@
 package config
 
+import "C"
 import (
-	"fmt"
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 	"log"
@@ -9,108 +9,203 @@ import (
 	"time"
 )
 
-var C *config
+var vipe = New()
 
 type config struct {
 	*viper.Viper
 }
 
 func New() *config {
-	C = &config{viper.New()}
-	C.AutomaticEnv()
-	C.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	return C
+	v := &config{viper.New()}
+	v.AutomaticEnv()
+	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	return v
 }
 
-func (c *config) EnvPrefix(prefix string) *config {
-	c.SetEnvPrefix(prefix)
-	return c
+func EnvPrefix(prefix string) {
+	vipe.SetEnvPrefix(prefix)
 }
 
-func (c *config) ConfigPath(configPath string) *config {
-	c.AddConfigPath(configPath)
-	return c
-}
-
-func (c *config) ConfigName(configName string) *config {
-	c.SetConfigName(configName)
-	return c
+func ConfigPath(configPath string) {
+	vipe.AddConfigPath(configPath)
 }
 
 // [JSON、TOML、YAML、HCL] supported
-// configName only with no extension
-func (c *config) Load(configName string) *config {
-	if err := c.ConfigName(configName).ReadInConfig(); err != nil {
-		panic(fmt.Errorf("Reading config file failed, %s \n", err))
-	}
-	return c
+// config name only with no extension
+func Load(configName string) error {
+	vipe.SetConfigName(configName)
+	return vipe.ReadInConfig()
 }
 
-func (c *config) Watching() error {
-	c.WatchConfig()
+// config file (full path with name and extension)
+func LoadFile(configFile string) error {
+	vipe.SetConfigFile(configFile)
+	return vipe.ReadInConfig()
+}
+
+func Watching() {
+	vipe.WatchConfig()
 	action := func(e fsnotify.Event) {
 		log.Println(e.Name, " config has been updated")
 	}
-	c.OnConfigChange(action)
-	return nil
+	vipe.OnConfigChange(action)
 }
 
-func Set(key string, value interface{}) {
-	C.Set(key, value)
+func Has(key string) bool {
+	return vipe.IsSet(key)
 }
 
-func Get(key string) interface{} {
-	return C.Get(key)
+func Set(key string, val interface{}) {
+	vipe.Set(key, val)
 }
 
-func GetString(key string) string {
-	return C.GetString(key)
+func SetDefault(key string, val interface{}) {
+	vipe.SetDefault(key, val)
 }
 
-func GetBool(key string) bool {
-	return C.GetBool(key)
+func String(key string) string {
+	return vipe.GetString(key)
 }
 
-func GetInt(key string) int {
-	return C.GetInt(key)
+func DefaultString(key string, val string) string {
+	if Has(key) {
+		return String(key)
+	}
+	return val
 }
 
-func GetInt32(key string) int32 {
-	return C.GetInt32(key)
+func Bool(key string) bool {
+	return vipe.GetBool(key)
 }
 
-func GetInt64(key string) int64 {
-	return C.GetInt64(key)
+func DefaultBool(key string, val bool) bool {
+	if Has(key) {
+		return Bool(key)
+	}
+	return val
 }
 
-func GetFloat64(key string) float64 {
-	return C.GetFloat64(key)
+func Int(key string) int {
+	return vipe.GetInt(key)
 }
 
-func GetTime(key string) time.Time {
-	return C.GetTime(key)
+func DefaultInt(key string, val int) int {
+	if Has(key) {
+		return Int(key)
+	}
+	return val
 }
 
-func GetDuration(key string) time.Duration {
-	return C.GetDuration(key)
+func Int32(key string) int32 {
+	return vipe.GetInt32(key)
 }
 
-func GetStringSlice(key string) []string {
-	return C.GetStringSlice(key)
+func DefaultInt32(key string, val int32) int32 {
+	if Has(key) {
+		return Int32(key)
+	}
+	return val
 }
 
-func GetStringMap(key string) map[string]interface{} {
-	return C.GetStringMap(key)
+func Int64(key string) int64 {
+	return vipe.GetInt64(key)
 }
 
-func GetStringMapString(key string) map[string]string {
-	return C.GetStringMapString(key)
+func DefaultInt64(key string, val int64) int64 {
+	if Has(key) {
+		return Int64(key)
+	}
+	return val
 }
 
-func GetStringMapStringSlice(key string) map[string][]string {
-	return C.GetStringMapStringSlice(key)
+func Float64(key string) float64 {
+	return vipe.GetFloat64(key)
 }
 
-func GetSizeInBytes(key string) uint {
-	return C.GetSizeInBytes(key)
+func DefaultFloat64(key string, val float64) float64 {
+	if Has(key) {
+		return Float64(key)
+	}
+	return val
+}
+
+func Time(key string) time.Time {
+	return vipe.GetTime(key)
+}
+
+func DefaultTime(key string, val time.Time) time.Time {
+	if Has(key) {
+		return Time(key)
+	}
+	return val
+}
+
+func Duration(key string) time.Duration {
+	return vipe.GetDuration(key)
+}
+
+func DefaultDuration(key string, val time.Duration) time.Duration {
+	if Has(key) {
+		return Duration(key)
+	}
+	return val
+}
+
+func StringSlice(key string) []string {
+	return vipe.GetStringSlice(key)
+}
+
+func DefaultStringSlice(key string, val []string) []string {
+	if Has(key) {
+		return StringSlice(key)
+	}
+	return val
+}
+
+func StringMap(key string) map[string]interface{} {
+	return vipe.GetStringMap(key)
+}
+
+func DefaultStringMap(key string, val map[string]interface{}) map[string]interface{} {
+	if Has(key) {
+		return StringMap(key)
+	}
+	return val
+}
+
+func StringMapString(key string) map[string]string {
+	return vipe.GetStringMapString(key)
+}
+
+func DefaultStringMapString(key string, val map[string]string) map[string]string {
+	if Has(key) {
+		return StringMapString(key)
+	}
+	return val
+}
+
+func StringMapStringSlice(key string) map[string][]string {
+	return vipe.GetStringMapStringSlice(key)
+}
+
+func DefaultStringMapStringSlice(key string, val map[string][]string) map[string][]string {
+	if Has(key) {
+		return StringMapStringSlice(key)
+	}
+	return val
+}
+
+func SizeInBytes(key string) uint {
+	return vipe.GetSizeInBytes(key)
+}
+
+func DefaultSizeInBytes(key string, val uint) uint {
+	if Has(key) {
+		return SizeInBytes(key)
+	}
+	return val
+}
+
+func All() map[string]interface{} {
+	return vipe.AllSettings()
 }

@@ -1,0 +1,34 @@
+ServiceName: foot
+Environment: develop
+Version: 0.0.1
+Debug: true
+
+Mysql:
+  Default:
+    Host: rm-abc.mysql.rds.aliyuncs.com
+    Port: 3306
+    Username: root
+    Password: 123456
+    Database: mis
+    Charset: utf8
+
+RabbitMQ:
+  Connection:
+    Default:
+      Host: 10.123.123.123
+      Port: 5672
+      User: root
+      Password: 123456
+      Vhost: /
+
+  Exchange:
+    GroupName1:
+      ExchangeName: shawn-ex-test
+      QueueName: shawn-push
+      RoutingKey: shawn-push
+      ConsumerTag: FootTest-ConsumerTag
+    GroupName2:
+      ExchangeName: shawn-ex-test
+      QueueName: shawn-aaa
+      RoutingKey: shawn-aaa
+      ConsumerTag:
