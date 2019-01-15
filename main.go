@@ -30,19 +30,18 @@ func main() {
 
 	// usingMQ()
 
-	// usingOrm()
+	usingOrm()
 
 	fmt.Println("blocking...")
 	select {}
 }
 
 func usingOrm() {
-	//log.New(config.Int("logLevel"))
-	//db, _ := orm.NewGorm()
-	//
-	//var personList Mistake
-	//db.First(&personList)
-	//fmt.Println(personList)
+
+	db := orm.D()
+	var personList Mistake
+	db.First(&personList)
+	fmt.Println(personList)
 }
 
 func usingMQ() {

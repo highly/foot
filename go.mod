@@ -6,7 +6,7 @@ require (
 	github.com/denisenkom/go-mssqldb v0.0.0-20190111225525-2fea367d496d // indirect
 	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
 	github.com/fsnotify/fsnotify v1.4.7
-	github.com/go-sql-driver/mysql v1.4.1 // indirect
+	github.com/go-sql-driver/mysql v1.4.1
 	github.com/gofrs/uuid v3.2.0+incompatible // indirect
 	github.com/google/go-cmp v0.2.0 // indirect
 	github.com/jinzhu/gorm v1.9.2

@@ -1,10 +1,17 @@
 package orm
 
-import "time"
+import (
+	"github.com/jinzhu/gorm"
+	"time"
+)
 
 type Model struct {
-	ID        uint64     `gorm:"primary_key" json:"id"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
-	DeletedAt *time.Time `sql:"index" json:"deleted_at"`
+	ID        uint64 `gorm:"primary_key"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time `sql:"index"`
+}
+
+func IsRecordNotFoundError(err error) bool {
+	return gorm.IsRecordNotFoundError(err)
 }
