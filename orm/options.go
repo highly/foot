@@ -48,7 +48,7 @@ func (o *Options) DSN() string {
 func OptionsFromConfig(scope string) *Options {
 	return &Options{
 		User:            config.String("mysql." + scope + ".user"),
-		Passwd:          config.String("mysql." + scope + ".password"),
+		Passwd:          config.String("mysql." + scope + ".passwd"),
 		Addr:            config.String("mysql." + scope + ".addr"),
 		DBName:          config.String("mysql." + scope + ".dbname"),
 		Charset:         config.DefaultString("mysql."+scope+".charset", DefaultCharset),
