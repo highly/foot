@@ -2,6 +2,7 @@ package utils
 
 import (
 	"crypto/md5"
+	"crypto/sha512"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -49,6 +50,12 @@ func Md5Hash(in string) string {
 	h := md5.New()
 	io.WriteString(h, in)
 	return fmt.Sprintf("%x", h.Sum(nil))
+}
+
+func Sha512(in string) string {
+	s := sha512.New()
+	io.WriteString(s, in)
+	return fmt.Sprintf("%x", s.Sum(nil))
 }
 
 func Implode(in interface{}, glue string) string {
